@@ -8,7 +8,7 @@
 //블루투스
 #define BT_RXD 3
 #define BT_TXD 4
-SoftwareSerial mySerial(BT_RXD, BT_TXD); // HC-06 TX=11번핀 , RX=10번핀 연결
+SoftwareSerial mySerial(BT_RXD, BT_TXD); 
 int bluetoothStatePin = 5;
 bool bluetoothState = 0;
 bool checkInit = false;
