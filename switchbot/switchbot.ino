@@ -136,6 +136,12 @@ void sendAlarm(String str) {
     mySerial.print(min);
     mySerial.print(" : ");
     mySerial.println(sec);
+    if(str == "onTimeSetting") {
+      checkPosOn = true;
+    } else if(str == "offTimeSetting") {
+      checkPosOff = true;
+    }
+    checkPosCommon = false;
   }
   checkAlarm = true;
 }
@@ -258,11 +264,22 @@ void bluetoothCommand(String str) {
     Serial.println(offTimeSetting);
 #endif
   } else if (str == "ON") {
+#ifdef SERIALON
+    Serial.println("ON start ");
+#endif
     checkPosOn = true;
     checkPosCommon = false;
-  } else if (str = "OFF") {
+  } else if (str == "OFF") {
+#ifdef SERIALON
+    Serial.println("OFF start ");
+#endif
     checkPosOff = true;
     checkPosCommon = false;
+  } else {
+#ifdef SERIALON
+    Serial.print("Error Code :  ");
+    Serial.println(str);
+#endif
   }
   mySerial.flush();
 }

@@ -151,11 +151,12 @@ public class MainActivity extends AppCompatActivity {
                     // 해당 디바이스와 연결하는 함수 호출
                     connectDevice(charSequences[which].toString());
                     Date dt = new Date();
-                    SimpleDateFormat hour = new SimpleDateFormat("hh");
+                    SimpleDateFormat hour = new SimpleDateFormat("HH");
                     SimpleDateFormat minute = new SimpleDateFormat("mm");
                     SimpleDateFormat second = new SimpleDateFormat("ss");
                     Log.d("Test",hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString());
-                    String initStr = "INIT"+hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString()+"10:50:80:0500:2300";
+                    String initStr = "INIT"+hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString()+":15:50:75:0500:2300";
+                    Log.d("Test",initStr);
                     sendData(initStr);
                 }
             });
