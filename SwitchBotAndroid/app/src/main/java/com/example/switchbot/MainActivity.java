@@ -59,6 +59,9 @@ import java.util.UUID;
 import java.text.SimpleDateFormat;
 
 public class MainActivity extends AppCompatActivity {
+   // String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
+    String btDeviceAddress = "FC:A8:9A:00:58:1D"; //LEDONOFF
+
     private static final int REQUEST_ENABLE_BT = 10; // 블루투스 활성화 상태
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
     private Set<BluetoothDevice> devices; // 블루투스 디바이스 데이터 셋
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editTextSend; // 송신 할 데이터를 작성하기 위한 에딧 텍스트
     private Button buttonSend; // 송신하기 위한 버튼
     private Switch ledSwitch;
+    ConnectedThread connectedThread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +92,9 @@ public class MainActivity extends AppCompatActivity {
             // 여기에 처리 할 코드를 작성하세요.
         } else { // 디바이스가 블루투스를 지원 할 때
             if (bluetoothAdapter.isEnabled()) { // 블루투스가 활성화 상태 (기기에 블루투스가 켜져있음)
-                selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
+                connectDevice(btDeviceAddress);
+
+                //selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
             } else { // 블루투스가 비 활성화 상태 (기기에 블루투스가 꺼져있음)
                 // 블루투스를 활성화 하기 위한 다이얼로그 출력
                 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -100,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         buttonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendData(editTextSend.getText().toString());
+                connectedThread.write(editTextSend.getText().toString());
             }
         });
         ledSwitch.setOnCheckedChangeListener(new OnOffSwitchListener());
@@ -113,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_ENABLE_BT:
                 if (requestCode == RESULT_OK) { // '사용'을 눌렀을 때
-                    selectBluetoothDevice(); // 블루투스 디바이스 선택 함수 호출
+                    connectDevice(btDeviceAddress); //hc - 05
                 } else { // '취소'를 눌렀을 때
                     // 여기에 처리 할 코드를 작성하세요.
                 }
@@ -122,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void selectBluetoothDevice() {
+
         // 이미 페어링 되어있는 블루투스 기기를 찾습니다.
         devices = bluetoothAdapter.getBondedDevices();
         // 페어링 된 디바이스의 크기를 저장
@@ -150,17 +157,20 @@ public class MainActivity extends AppCompatActivity {
             builder.setItems(charSequences, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    // 해당 디바이스와 연결하는 함수 호출
-                    connectDevice(charSequences[which].toString());
-                    Date dt = new Date();
-                    SimpleDateFormat hour = new SimpleDateFormat("HH");
-                    SimpleDateFormat minute = new SimpleDateFormat("mm");
-                    SimpleDateFormat second = new SimpleDateFormat("ss");
-                    Log.d("Test",hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString());
-                    String initStr = "INIT"+hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString()+":15:50:75:0500:2300";
-                    Log.d("Test",initStr);
-                    sendData(initStr);
-                }
+
+                        connectDevice(charSequences[which].toString());
+
+                        Date dt = new Date();
+                        SimpleDateFormat hour = new SimpleDateFormat("HH");
+                        SimpleDateFormat minute = new SimpleDateFormat("mm");
+                        SimpleDateFormat second = new SimpleDateFormat("ss");
+                        Log.d("Test",hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString());
+                        String initStr = "INIT"+hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString()+":15:50:75:0500:2300";
+                        Log.d("Test",initStr);
+                        //sendData(initStr);
+                    }
+
+
             });
 
             // 뒤로가기 버튼 누를 때 창이 안닫히도록 설정
@@ -171,157 +181,121 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-    public void connectDevice(String deviceName) {
+    public void connectDevice(String device) {
         // 페어링 된 디바이스들을 모두 탐색
+        Log.d("Test","sel device : "+device);
+        devices = bluetoothAdapter.getBondedDevices();
         for(BluetoothDevice tempDevice : devices) {
             // 사용자가 선택한 이름과 같은 디바이스로 설정하고 반복문 종료
-            if(deviceName.equals(tempDevice.getName())) {
+            if(device.equals(tempDevice.getAddress())) {
                 bluetoothDevice = tempDevice;
                 break;
             }
         }
+        Log.d("Test","sel device : "+bluetoothDevice);
         // UUID 생성
         UUID uuid = java.util.UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
         // Rfcomm 채널을 통해 블루투스 디바이스와 통신하는 소켓 생성
+        boolean flag = true;
+        // 해당 디바이스와 연결하는 함수 호출
         try {
             bluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
             bluetoothSocket.connect();
-            // 데이터 송,수신 스트림을 얻어옵니다.
-            outputStream = bluetoothSocket.getOutputStream();
-            inputStream = bluetoothSocket.getInputStream();
-            // 데이터 수신 함수 호출
-            receiveData();
         } catch (IOException e) {
+            flag = false;
+            Log.d("Test","connection failed!");
             e.printStackTrace();
         }
-
-    }
-    public void receiveData() {
-        final Handler handler = new Handler();
-        // 데이터를 수신하기 위한 버퍼를 생성
-        readBufferPosition = 0;
-        readBuffer = new byte[1024];
-
-        // 데이터를 수신하기 위한 쓰레드 생성
-        workerThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(Thread.currentThread().isInterrupted()) {
-                    try {
-                        // 데이터를 수신했는지 확인합니다.
-                        int byteAvailable = inputStream.available();
-                        // 데이터가 수신 된 경우
-                        if(byteAvailable > 0) {
-                            // 입력 스트림에서 바이트 단위로 읽어 옵니다.
-                            byte[] bytes = new byte[byteAvailable];
-                            inputStream.read(bytes);
-                            // 입력 스트림 바이트를 한 바이트씩 읽어 옵니다.
-                            for(int i = 0; i < byteAvailable; i++) {
-                                byte tempByte = bytes[i];
-                                // 개행문자를 기준으로 받음(한줄)
-                                if(tempByte == '\n') {
-                                    // readBuffer 배열을 encodedBytes로 복사
-                                    byte[] encodedBytes = new byte[readBufferPosition];
-                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    // 인코딩 된 바이트 배열을 문자열로 변환
-                                    final String text = new String(encodedBytes, "US-ASCII");
-                                    readBufferPosition = 0;
-                                    handler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            // 텍스트 뷰에 출력
-                                            textViewReceive.append(text + "\n");
-                                        }
-                                    });
-                                } // 개행 문자가 아닐 경우
-                                else {
-                                    readBuffer[readBufferPosition++] = tempByte;
-                                }
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        // 1초마다 받아옴
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-        workerThread.start();
-    }
-    void sendData(String text) {
-        // 문자열에 개행문자("\n")를 추가해줍니다.
-        text += "\n";
-        try{
-            // 데이터 송신
-            outputStream.write(text.getBytes());
-        }catch(Exception e) {
-            e.printStackTrace();
+        if(flag) {
+            connectedThread = new ConnectedThread(bluetoothSocket);
+            connectedThread.start();
         }
+
+
     }
+
     class OnOffSwitchListener implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            if(isChecked)  sendData("ON");
-            else sendData("OFF");
+            if(isChecked)  connectedThread.write("ON");
+            else connectedThread.write("OFF");
 
         }
     }
-    private class ConnectedBluetoothThread extends Thread {
+
+    public class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
-        public ConnectedBluetoothThread(BluetoothSocket socket) {
+        public ConnectedThread(BluetoothSocket socket) {
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
-
+            // Get the input and output streams, using temp objects because
+            // member streams are final
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "소켓 연결 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show();
             }
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
-        }
-        public void run() {
-            byte[] buffer = new byte[1024];
-            int bytes;
 
+            Date dt = new Date();
+            SimpleDateFormat hour = new SimpleDateFormat("HH");
+            SimpleDateFormat minute = new SimpleDateFormat("mm");
+            SimpleDateFormat second = new SimpleDateFormat("ss");
+            Log.d("Test",hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString());
+            String initStr = "INIT"+hour.format(dt).toString()+":"+minute.format(dt).toString()+":"+second.format(dt).toString()+":15:50:75:0500:2300";
+            Log.d("Test",initStr);
+            write(initStr);
+        }
+
+        @Override
+        public void run() {
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+            int bytes; // bytes returned from read()
+            // Keep listening to the InputStream until an exception occurs
             while (true) {
                 try {
+                    // Read from the InputStream
                     bytes = mmInStream.available();
                     if (bytes != 0) {
-                        SystemClock.sleep(100);
-                        bytes = mmInStream.available();
-                        bytes = mmInStream.read(buffer, 0, bytes);
-                        mBluetoothHandler.obtainMessage(BT_MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                        buffer = new byte[1024];
+                        SystemClock.sleep(100); //pause and wait for rest of data. Adjust this depending on your sending speed.
+                        bytes = mmInStream.available(); // how many bytes are ready to be read?
+                        bytes = mmInStream.read(buffer); // record how many bytes we actually read
+//                        byte[] encodedBytes = new byte[bytes];
+                        readBuffer = new byte[bytes];
+                        System.arraycopy(buffer, 0, readBuffer, 0, bytes);
+                        final String text = new String(readBuffer, "US-ASCII");
+                        bytes = 0;
+                        Log.d("Test","REcieve : "+text);
                     }
                 } catch (IOException e) {
+                    e.printStackTrace();
+
                     break;
                 }
             }
         }
-        public void write(String str) {
-            byte[] bytes = str.getBytes();
+
+        /* Call this from the main activity to send data to the remote device */
+        public void write(String input) {
+            byte[] bytes = input.getBytes();           //converts entered String into bytes
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "데이터 전송 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show();
             }
         }
+
+        /* Call this from the main activity to shutdown the connection */
         public void cancel() {
             try {
                 mmSocket.close();
             } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "소켓 해제 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show();
             }
         }
     }
