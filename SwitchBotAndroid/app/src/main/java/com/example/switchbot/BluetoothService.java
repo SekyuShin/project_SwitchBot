@@ -24,7 +24,7 @@ import java.util.UUID;
 
 public class BluetoothService extends Service {
 
-    // String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
+     //String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
     String btDeviceAddress = "FC:A8:9A:00:58:1D"; //LEDONOFF
 
     private BluetoothDevice bluetoothDevice; // 블루투스 디바이스
@@ -43,14 +43,16 @@ public class BluetoothService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 블루투스 어댑터를 디폴트 어댑터로 설정
-
+        Log.d("Test", "test service onStartCommand : ");
         if (intent == null) {
             return Service.START_STICKY; //서비스가 종료되어도 자동으로 다시 실행시켜줘!
         } else if(bluetoothAdapter.isEnabled()){
             // intent가 null이 아니다.
             // 액티비티에서 intent를 통해 전달한 내용을 뽑아낸다.(if exists)
             strText= intent.getStringExtra("strText");
-            if(connectedThread.isAlive()) {
+            Log.d("Test", "test  : "+strText);
+            Log.d("Test", "test2  : ");
+            if(connectedThread != null && connectedThread.isAlive()) {
                 connectedThread.write(strText);
             } else {
                 connectDevice(btDeviceAddress);
@@ -97,6 +99,7 @@ public class BluetoothService extends Service {
         if(flag) {
             connectedThread = new ConnectedThread(bluetoothSocket);
             connectedThread.start();
+            connectedThread.write(strText);
         }
 
 

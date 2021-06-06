@@ -70,13 +70,13 @@ public class MainActivity extends AppCompatActivity {
 
     String initStr;
     Intent passedIntent;
-    Intent intent = new Intent(getApplicationContext(), BluetoothService.class); // 실행시키고픈 서비스클래스 이름
+    Intent intent ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         passedIntent= getIntent();
         processCommand(passedIntent);
-
+        intent = new Intent(getApplicationContext(), BluetoothService.class); // 실행시키고픈 서비스클래스 이름
         setContentView(R.layout.activity_main);
         // 각 컨테이너들의 id를 매인 xml과 맞춰준다.
         textViewReceive = (TextView) findViewById(R.id.textView_receive);
@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
             // 여기에 처리 할 코드를 작성하세요.
         } else { // 디바이스가 블루투스를 지원 할 때
             if (bluetoothAdapter.isEnabled()) { // 블루투스가 활성화 상태 (기기에 블루투스가 켜져있음)
-
 
                 intent.putExtra("strText", initStr); //필요시 인텐트에 필요한 데이터를 담아준다
                 startService(intent); // 서비스 실행!
@@ -133,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
     private void processCommand(Intent intent) {
         if (intent != null) {
             String recievText = intent.getStringExtra("recievText");
-            Toast.makeText(this, "서비스로부터 전달받은 데이터: " + recievText, Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "서비스로부터 전달받은 데이터: " + recievText, Toast.LENGTH_LONG).show();
+            Log.d("Test","서비스로부터 전달받은 데이터: " + recievText);
         }
     }
 
