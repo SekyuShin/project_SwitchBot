@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/sendText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:text="send"
+        android:id="@+id/sendBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/recieverText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Switch
+        android:id="@+id/onOffSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="66dp"
+        android:text="Switch"
+        tools:layout_editor_absoluteX="135dp"
+        tools:layout_editor_absoluteY="98dp" />
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <TextView
+        android:text="posOn"
+        android:layout_weight="2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <EditText
+        android:id="@+id/posOn"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:text="posCommon"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:id="@+id/posCommon"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:text="posOff"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:id="@+id/posOff"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:text="onTimerText"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:id="@+id/onTimerText"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:text="offTimerText"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:id="@+id/offTimerText"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/saveBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="save" />
+
+
+</LinearLayout>

@@ -161,7 +161,19 @@ void settingTime() {
   Serial.print(" : ");
   Serial.print(min);
   Serial.print(" : ");
-  Serial.println(sec);
+  Serial.print(sec);
+  //Serial.println(sec);
+  //test
+   Serial.print(" / ");
+   Serial.print(posOn);
+    Serial.print(" / ");
+  Serial.print(posCommon);
+   Serial.print(" / ");
+  Serial.print(posOff);
+   Serial.print(" / ");
+  Serial.print(onTimeSetting);
+   Serial.print(" / ");
+  Serial.println(offTimeSetting);
 #endif
 }
 void bluetoothCommand(String str) {
