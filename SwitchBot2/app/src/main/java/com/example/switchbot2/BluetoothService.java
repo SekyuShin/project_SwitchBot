@@ -20,8 +20,9 @@ import java.util.UUID;
 public class BluetoothService extends Service {
     String text;
     TextFile textFile;
-    //String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
-    String btDeviceAddress = "FC:A8:9A:00:58:1D"; //LEDONOFF
+    String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
+   // String btDeviceAddress = "FC:A8:9A:00:58:1D"; //LEDONOFF
+
     private BluetoothDevice bluetoothDevice; // 블루투스 디바이스
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
     private Set<BluetoothDevice> devices; // 블루투스 디바이스 데이터 셋
