@@ -18,66 +18,73 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
-public class SwitchBotService extends IntentService {
+public class SwitchBotService extends Service {
     private BluetoothDevice bluetoothDevice; // 블루투스 디바이스
     private BluetoothAdapter bluetoothAdapter; // 블루투스 어댑터
     private Set<BluetoothDevice> devices; // 블루투스 디바이스 데이터 셋
     private BluetoothSocket bluetoothSocket = null; // 블루투스 소켓
     ConnectedThread connectedThread = null;
     private byte[] readBuffer; // 수신 된 문자열을 저장하기 위한 버퍼
-    String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
-    // String btDeviceAddress = "FC:A8:9A:00:58:1D"; //LEDONOFF
+    //String btDeviceAddress = "FC:A8:9A:00:91:FE"; //hc - 05
+    String btDeviceAddress = "FC:A8:9A:00:58:1D"; //LEDONOFF
     public static final String ACTION = "kr.go.switchbot3_android.SwitchBotService";
     String sendText;
+    Service thisService; //쓰레드 종료시 서비스 종료를 위한 서비스 인스턴스
     public SwitchBotService() {
-        super("test-service");
+        thisService = this;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("Test","onStartCommand");
         if (intent == null) {
-            Log.d("Test","Intent is null");
             return Service.START_STICKY; //서비스 종료시 다시 시작
         } else {
-            sendText =  intent.getStringExtra("test");
-            connectDevice(btDeviceAddress);
-            connectedThread.write(sendText);
-           /* if(connectedThread != null && connectedThread.isAlive()) { //
-                Log.d("Test","Thread alive : "+connectedThread);
+            sendText =  ReceiveMessage(intent);
+            //메시지 리시버 함수 따로 생성
+           if(connectedThread != null && connectedThread.isAlive()) { //
                 connectedThread.write(sendText);
             } else {
-                Log.d("Test","connectedThread not alive : ");
                 if(connectDevice(btDeviceAddress)) connectedThread.write(sendText);
                 else {
-                    Log.d("Test","connection fail ");
                     Toast.makeText(getApplicationContext(),"connection failed!",Toast.LENGTH_SHORT).show();
-                    //this.onDestroy();
+                    this.onDestroy();
                 }
-            }*/
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
-
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) { //Activity에서 전달받은 데이터 처리
-        //String val = intent.getStringExtra("test");
-        //Intent sendIntent = new Intent(ACTION);
-//        sendIntent.putExtra("resultCode", Activity.RESULT_OK);
-//        sendIntent.putExtra("sendTest","service receive: "+val);
-//        LocalBroadcastManager.getInstance(this).sendBroadcast(sendIntent);
+    private String ReceiveMessage(Intent intent) {
+        String str;
+        str =  intent.getStringExtra("Message");
+        if(str.equals("INIT")) {
+            String initText;
+            long now = System.currentTimeMillis(); //TODO 현재시간 받아오기
+            Date date = new Date(now); //TODO Date 객체 생성
+            SimpleDateFormat sdf = new SimpleDateFormat("kk:mm:ss");
+            String nowTime = sdf.format(date);
+            initText = "INIT" +nowTime + ":50:75:95:0700:2300"; //test hardCoding
+            str = initText;
+        }
+        return str;
+    }
+    private void sendMessage(String text) {
+        Log.d("messageService", "Broadcasting message");
+        Intent intent = new Intent(ACTION);
+        intent.putExtra("Message", text);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override
     public void onDestroy() {
-
-       // if(connectedThread != null && connectedThread.isAlive())  connectedThread.cancel();
-
-        super.onDestroy();
         Log.d("Test","Service Destroy");
+       if(connectedThread != null && connectedThread.isAlive())  connectedThread.cancel();
+        super.onDestroy();
     }
 
     public boolean connectDevice(String device) {
@@ -100,7 +107,6 @@ public class SwitchBotService extends IntentService {
         if(flag) {
             connectedThread = new ConnectedThread(bluetoothSocket);
             connectedThread.start();
-            connectedThread.write("Test");
         }
         return flag;
     }
@@ -127,6 +133,7 @@ public class SwitchBotService extends IntentService {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
+                thisService.onDestroy();
             }
 
             mmInStream = tmpIn;
@@ -148,8 +155,10 @@ public class SwitchBotService extends IntentService {
                         readBuffer = new byte[bytes];
                         System.arraycopy(buffer, 0, readBuffer, 0, bytes);
                         final String text = new String(readBuffer, "US-ASCII");
+                        sendMessage(text);
                     }
                 } catch (IOException e) {
+                    thisService.onDestroy();
                     e.printStackTrace();
                     break;
                 }
@@ -160,14 +169,15 @@ public class SwitchBotService extends IntentService {
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
+                thisService.onDestroy();
                 e.printStackTrace();
             }
         }
         public void cancel() {
-            Log.d("Test","Thread cancel");
             try {
                 mmSocket.close();
             } catch (IOException e) {
+               // thisService.onDestroy();
                 e.printStackTrace();
             }
         }
