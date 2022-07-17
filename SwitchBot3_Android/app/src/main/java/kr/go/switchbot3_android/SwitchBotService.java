@@ -70,14 +70,11 @@ public class SwitchBotService extends Service {
             String nowTime = sdf.format(date);
             initText = "INIT" +nowTime + ":50:75:95:0700:2300"; //test hardCoding
             str = initText;
-        } else if(str.contains("TERMINAL")) {
-            if(str.contains("START")) str = "TERMINAL";
-            else str = str.split("\\.")[1];
         }
         return str;
     }
     private void sendMessage(String text) {
-        Log.d("Test", "Broadcasting message");
+        Log.d("messageService", "Broadcasting message");
         Intent intent = new Intent(ACTION);
         intent.putExtra("Message", text);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -92,7 +89,7 @@ public class SwitchBotService extends Service {
 
     public boolean connectDevice(String device) {
         // 페어링 된 디바이스들을 모두 탐색
-
+        Log.d("Test","sel device : "+device);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); // 블루투스 어댑터를 디폴트 어댑터로 설정
         bluetoothDevice = bluetoothAdapter.getRemoteDevice(btDeviceAddress);
         // UUID 생성
