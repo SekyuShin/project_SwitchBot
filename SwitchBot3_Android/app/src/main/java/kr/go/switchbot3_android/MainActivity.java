@@ -17,11 +17,13 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     Switch switchOnOff;
-
+    Button terminalBtn;
+    Button testBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         switchOnOff = (Switch) findViewById(R.id.onOffSwitch);
         switchOnOff.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -32,28 +34,31 @@ public class MainActivity extends AppCompatActivity {
                 startService(intent);
             }
         });
-        Intent intent = new Intent(getApplicationContext(), SwitchBotService.class);
-        intent.putExtra("Message", "INIT"); //필요시 인텐트에 필요한 데이터를 담아준다
-        startService(intent);
+
+        terminalBtn = (Button)findViewById(R.id.terminalBtn);
+        terminalBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(),TerminalActivity.class);
+                startActivity(intent);
+            }
+        });
+        testBtn = (Button)findViewById(R.id.testBtn);
+        testBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SwitchBotService.class);
+                intent.putExtra("Message", "INIT"); //필요시 인텐트에 필요한 데이터를 담아준다
+                startService(intent);
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(SwitchBotService.ACTION);
-        LocalBroadcastManager.getInstance(this).registerReceiver(testReceiver,filter);
+        Intent intent = new Intent(getApplicationContext(), SwitchBotService.class);
+        intent.putExtra("Message", "INIT"); //필요시 인텐트에 필요한 데이터를 담아준다
+        startService(intent);
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(testReceiver);
-    }
-    private BroadcastReceiver testReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String resultVal = intent.getStringExtra("Message");
-            Log.d("Test","Main_Activity receive : "+resultVal);
-        }
-    };
 }

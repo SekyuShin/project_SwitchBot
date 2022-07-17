@@ -10,11 +10,16 @@
         android:text="Terminal Mode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/recieverText"
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/rcvText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </ScrollView>
     <EditText
         android:id="@+id/sendText"
         android:layout_width="match_parent"
@@ -29,4 +34,5 @@
         android:id="@+id/sendBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+
 </LinearLayout>
