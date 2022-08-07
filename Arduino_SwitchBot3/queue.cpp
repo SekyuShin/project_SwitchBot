@@ -28,6 +28,6 @@ bool QUEUE::isFull() {
   else return false;
 }
 bool QUEUE::empty() {
-  if(rear == front)return true;
+  if(rear == front) return true;
   else return false;
 }

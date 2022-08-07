@@ -67,7 +67,7 @@ void settingTime() {
 #ifdef SERIALON
   Serial.println(String(timer.hour)+":"+String(timer.minute)+":"+String(timer.sec));
 #endif
-  SetSendQueue(String(timer.hour)+":"+String(timer.minute)+":"+String(timer.sec));
+  if(GetCheckMode() == 0)SetSendQueue(String(timer.hour)+":"+String(timer.minute)+":"+String(timer.sec));
 }
 //1초 단위 체크
 bool checkTime() {
@@ -82,7 +82,7 @@ bool checkTime() {
 #ifdef SERIALON
           Serial.println("alarm SwitOn");
 #endif
-          SetSendQueue("alarm SwitOn");
+          if(GetCheckMode() == 0) SetSendQueue("alarm SwitOn");
           alarm.checkSwitOn = true;
         }
       }else if (alarm.switOff / 100 == timer.hour && alarm.switOff % 100 == timer.minute) {
@@ -91,7 +91,7 @@ bool checkTime() {
 #ifdef SERIALON
           Serial.println("alarm SwitOff");
 #endif
-          SetSendQueue("alarm SwitOff");
+          if(GetCheckMode() == 0) SetSendQueue("alarm SwitOff");
           alarm.checkSwitOff = true;
         }
       } else if(alarm.checkSwitOn || alarm.checkSwitOff){

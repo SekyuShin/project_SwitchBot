@@ -15,7 +15,7 @@
 #define BT_TXD 4
 
 //디버깅을 위한 옵션
-#define SERIALON 1 
+#define SERIALON 0 
 #define BTSTATEPIN 5
 
 /*
@@ -107,7 +107,7 @@ void TerminalMode(String str) {
   }
 }
 
-/기본값을 받은 후에 동작하는 Normal Mode
+//기본값을 받은 후에 동작하는 Normal Mode
 void NormalMode(String str) {
   if (str.substring(0, 2) == "CL") { //clock 값 재설정
     int index1 = str.indexOf(':');
@@ -157,6 +157,9 @@ void WaitMode() {
 }
 bool GetCheckOffBeforeRst() {
   return checkOffBeforeRst;
+}
+int GetCheckMode() {
+  return mainstep;
 }
 void SetCheckOffBeforeRst(bool ch) {
   checkOffBeforeRst = ch;
